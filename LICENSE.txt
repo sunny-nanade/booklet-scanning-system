@@ -1,0 +1,5 @@
+Copyright © 2025 Sunny Nanade
+
+This software is proprietary and confidential. No part of this codebase may be copied, used, modified, or distributed without explicit written permission from the author.
+
+For inquiries regarding usage, please contact: sunny.nanade@nmims.edu
