@@ -1,0 +1,9 @@
+﻿{
+  "cameraId": "",
+  "flipH": false,
+  "flipV": false,
+  "leftCrop": [0, 0, 600, 1600],
+  "rightCrop": [600, 0, 600, 1600],
+  "main_pages": 18,
+  "supplement_page_count": 4
+}

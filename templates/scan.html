@@ -1,0 +1,297 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Booklet Scanning System</title>
+  <link rel="stylesheet" href="/static/css/styles.css" />
+  <style>
+    body {
+      display: flex;
+      margin: 0;
+      font-family: Arial, sans-serif;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    .left-section {
+      flex: 3;
+      display: flex;
+      flex-direction: column;
+      padding: 0;
+    }
+
+    .preview-section {
+      flex: 1;
+      padding: 15px;
+      border-left: 2px solid #ccc;
+      overflow-y: auto;
+      background: white;
+    }
+
+    .header-container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 20px;
+      background: white;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    }
+
+    .header-title {
+      margin: 0;
+      font-size: 20px;
+      color: #333;
+    }
+
+    .logo {
+      height: 50px;
+    }
+
+    .back-btn {
+      padding: 6px 12px;
+      background: #333;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 13px;
+      margin-left: 10px;
+    }
+
+    .back-btn:hover {
+      background: #555;
+    }
+
+    .scan-container {
+      display: flex;
+      flex-grow: 1;
+      padding: 20px;
+      background: #f8f9fa;
+      align-items: center;
+    }
+
+    .video-panel {
+      flex: 2;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .control-panel {
+      flex: 1;
+      padding: 0 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .video-container {
+      width: 100%;
+      max-width: 640px;
+    }
+
+    .video-wrapper {
+      position: relative;
+      width: 100%;
+      height: 0;
+      padding-bottom: 75%; /* 4:3 aspect ratio */
+      background: #000;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    video {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    canvas#overlayCanvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 10; /* fixed: canvas on top of video */
+      display: block;
+    }
+
+    .supplement-selector {
+      margin-bottom: 20px;
+      width: 100%;
+      max-width: 300px;
+    }
+
+    .supplement-selector label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: bold;
+      font-size: 16px;
+      color: #444;
+    }
+
+    #supplementCount {
+      width: 100%;
+      padding: 8px;
+      font-size: 15px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      background: white;
+    }
+
+    #statusText {
+      margin: 15px 0;
+      font-size: 15px;
+      text-align: center;
+      color: #333;
+      min-height: 20px;
+    }
+
+    #resetQRBtn {
+      padding: 8px 16px;
+      font-size: 15px;
+      border: none;
+      background: #0066cc;
+      color: white;
+      border-radius: 6px;
+      cursor: pointer;
+      width: 100%;
+      max-width: 300px;
+      transition: background 0.3s;
+    }
+
+    #resetQRBtn:hover {
+      background: #004d99;
+    }
+
+    #resetQRBtn:disabled {
+      background: #cccccc;
+      cursor: not-allowed;
+    }
+
+    .preview-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+    }
+
+    .preview-options {
+      display: flex;
+      gap: 10px;
+    }
+
+    .view-toggle {
+      padding: 5px 10px;
+      background: #f0f0f0;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 13px;
+    }
+
+    .preview-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      align-items: center;
+    }
+
+    .booklet-spread {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+    }
+
+    .booklet-page {
+      width: 120px;
+      height: 170px;
+      object-fit: contain;
+      border: 1px solid #ddd;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      background: white;
+    }
+
+    .single-page {
+      margin: 5px 0;
+    }
+
+    .list-view .booklet-page {
+      width: 100px;
+      height: 140px;
+      margin: 5px 0;
+    }
+
+    #supplementCount:disabled {
+      background: #f5f5f5;
+      color: #999;
+      cursor: not-allowed;
+    }
+  </style>
+</head>
+<body tabindex="0">
+  <div class="left-section">
+    <div class="header-container">
+      <h1 class="header-title">Booklet Scanning System</h1>
+      <div>
+        <img src="/static/assets/nmims.png" alt="NMIMS Logo" class="logo">
+      </div>
+      <div>
+        <button class="back-btn" onclick="window.location.href='/'">Home</button>
+        <button class="back-btn" onclick="window.location.href='/config'">Config</button>
+      </div>
+    </div>
+
+    <div class="scan-container">
+      <div class="video-panel">
+        <div class="video-container">
+          <div class="video-wrapper">
+            <video id="video" autoplay playsinline></video>
+            <canvas id="overlayCanvas"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <div class="control-panel">
+        <div class="supplement-selector">
+          <label for="supplementCount">SUPPLEMENT BOOKLETS (4 PAGES EACH)</label>
+          <select id="supplementCount" name="supplementCount">
+            <option value="0" selected>0 (Main Booklet Only - 32 pages)</option>
+            <option value="1">1 Supplement (36 pages total)</option>
+            <option value="2">2 Supplements (40 pages total)</option>
+            <option value="3">3 Supplements (44 pages total)</option>
+            <option value="4">4 Supplements (48 pages total)</option>
+            <option value="5">5 Supplements (52 pages total)</option>
+            <option value="6">6 Supplements (56 pages total)</option>
+            <option value="7">7 Supplements (60 pages total)</option>
+            <option value="8">8 Supplements (64 pages total)</option>
+            <option value="9">9 Supplements (68 pages total)</option>
+          </select>
+        </div>
+        <a id="downloadLink" href="#" target="_blank" style="display:none; margin-top: 10px;">
+          📄 Download PDF
+        </a>
+        <div id="statusText">Ready to scan</div>
+        <button id="resetQRBtn" onclick="resetQR()">🔄 Reset QR Lock</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="preview-section">
+    <div class="preview-header">
+      <h3>Scanned Pages</h3>
+      <div class="preview-options">
+        <button id="toggleViewBtn" class="view-toggle">Toggle View</button>
+      </div>
+    </div>
+    <div id="previewContainer" class="preview-grid booklet-view"></div>
+  </div>
+
+  <script type="module" src="/static/js/main.js"></script>
+  <script type="module" src="/static/js/preview.js"></script>
+</body>
+</html>
